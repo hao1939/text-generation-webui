@@ -58,7 +58,8 @@ def load_model(model_name, loader=None):
         'FlexGen': flexgen_loader,
         'RWKV': RWKV_loader,
         'ExLlama': ExLlama_loader,
-        'ExLlama_HF': ExLlama_HF_loader
+        'ExLlama_HF': ExLlama_HF_loader,
+        'OpenAI': openai_loader,
     }
 
     if loader is None:
@@ -117,6 +118,10 @@ def load_tokenizer(model_name, model):
             tokenizer = AutoTokenizer.from_pretrained(path_to_model, trust_remote_code=shared.args.trust_remote_code)
 
     return tokenizer
+
+
+def openai_loader(model_name):
+    return None
 
 
 def huggingface_loader(model_name):

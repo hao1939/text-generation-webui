@@ -1,8 +1,8 @@
 import os
 import warnings
 
-from modules.logging_colors import logger
 from modules.block_requests import RequestBlocker
+from modules.logging_colors import logger
 
 os.environ['GRADIO_ANALYTICS_ENABLED'] = 'False'
 os.environ['BITSANDBYTES_NOWELCOME'] = '1'
@@ -12,6 +12,7 @@ with RequestBlocker():
     import gradio as gr
 
 import matplotlib
+
 matplotlib.use('Agg')  # This fixes LaTeX rendering on some systems
 
 import importlib
@@ -202,7 +203,7 @@ def create_model_menus():
 
     with gr.Row():
         with gr.Column():
-            shared.gradio['loader'] = gr.Dropdown(label="Model loader", choices=["Transformers", "AutoGPTQ", "GPTQ-for-LLaMa", "ExLlama", "ExLlama_HF", "llama.cpp"], value=None)
+            shared.gradio['loader'] = gr.Dropdown(label="Model loader", choices=["Transformers", "AutoGPTQ", "GPTQ-for-LLaMa", "ExLlama", "ExLlama_HF", "llama.cpp", "OpenAI"], value=None)
             with gr.Box():
                 with gr.Row():
                     with gr.Column():
@@ -225,6 +226,13 @@ def create_model_menus():
                         shared.gradio['gpu_split'] = gr.Textbox(label='gpu-split', info='Comma-separated list of VRAM (in GB) to use per GPU. Example: 20,7,7')
                         shared.gradio['max_seq_len'] = gr.Slider(label='max_seq_len', minimum=2048, maximum=16384, step=256, info='Maximum sequence length.', value=shared.args.max_seq_len)
                         shared.gradio['compress_pos_emb'] = gr.Slider(label='compress_pos_emb', minimum=1, maximum=8, step=1, info='Positional embeddings compression factor. Should typically be set to max_seq_len / 2048.', value=shared.args.compress_pos_emb)
+
+                        # opanai only
+                        shared.gradio['openai_api_key'] = gr.Textbox(label='openai_api_key', info='OpenAI API key')
+                        shared.gradio['openai_model'] = gr.Textbox(label='openai_model', info='OpenAI model name')
+                        shared.gradio['openai_api_type'] = gr.Dropdown(label="openai_api_type", choices=["open_ai", "azure"], value=shared.args.openai_api_type)
+                        shared.gradio['openai_api_base'] = gr.Textbox(label="openai_api_base", info='OpenAI API base URL')
+                        shared.gradio['openai_deployment'] = gr.Textbox(label="openai_deployment", info='Azure OpenAI deployment name')
 
                     with gr.Column():
                         shared.gradio['triton'] = gr.Checkbox(label="triton", value=shared.args.triton)
