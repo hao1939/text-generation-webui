@@ -18,9 +18,10 @@ from transformers import (
 )
 
 import modules.shared as shared
-from modules import llama_attn_hijack, sampler_hijack
+from modules import llama_attn_hijack, models_settings, sampler_hijack
 from modules.logging_colors import logger
 from modules.models_settings import infer_loader
+from modules.openai_model import create_openai_model
 
 transformers.logging.set_verbosity_error()
 
@@ -121,7 +122,17 @@ def load_tokenizer(model_name, model):
 
 
 def openai_loader(model_name):
-    return None
+    model_settings = models_settings.get_model_settings_from_yamls(model_name)
+    if 'openai_api_key' not in model_settings or not model_settings['openai_api_key']:
+        logger.error("Not a valid OpenAI model. Please provide an API key.")
+        return None, None
+    logger.info("Loading OpenAI model: %s, api type: %s, [deployment: %s]", model_name, model_settings['openai_api_type'], model_settings['openai_deployment'])
+    return create_openai_model(model_name=model_name,
+                             api_key=model_settings['openai_api_key'],
+                             api_type=model_settings['openai_api_type'],
+                             api_endpoint=model_settings['openai_api_base'],
+                             deployment=model_settings['openai_deployment'],
+                             ), None
 
 
 def huggingface_loader(model_name):

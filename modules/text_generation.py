@@ -35,6 +35,9 @@ def get_max_prompt_length(state):
 
 
 def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_length=None):
+    # no need to encode if we're using the OpenAI API
+    if shared.model.__class__.__name__ in ["OpenAIModel"]:
+        return prompt
     if shared.model.__class__.__name__ in ['LlamaCppModel', 'RWKVModel']:
         input_ids = shared.tokenizer.encode(str(prompt))
         input_ids = np.array(input_ids).reshape(1, len(input_ids))
@@ -179,7 +182,9 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False):
             yield ''
             return
 
-        if shared.model.__class__.__name__ in ['LlamaCppModel', 'RWKVModel', 'ExllamaModel']:
+        if shared.model.__class__.__name__ in ['OpenAIModel']:
+            generate_func = generate_reply_openai
+        elif shared.model.__class__.__name__ in ['LlamaCppModel', 'RWKVModel', 'ExllamaModel']:
             generate_func = generate_reply_custom
         elif shared.args.flexgen:
             generate_func = generate_reply_flexgen
@@ -309,6 +314,34 @@ def generate_reply_HF(question, original_question, seed, state, stopping_strings
         t1 = time.time()
         original_tokens = len(original_input_ids[0])
         new_tokens = len(output) - (original_tokens if not shared.is_seq2seq else 0)
+        print(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {original_tokens}, seed {seed})')
+        return
+
+def generate_reply_openai(question, original_question, seed, state, eos_token=None, stopping_strings=None, is_chat=False):
+    seed = set_manual_seed(state['seed'])
+
+    # import pdb; pdb.set_trace()
+    t0 = time.time()
+    reply = ''
+    try:
+
+        if not state['stream']:
+            reply = shared.model.generate(question, state, is_chat=is_chat)
+            if not is_chat:
+                reply = apply_extensions('output', reply)
+            yield reply
+        else:
+            for reply in shared.model.generate_with_streaming(question, state, is_chat=is_chat):
+                if not is_chat:
+                    reply = apply_extensions('output', reply)
+                yield reply
+
+    except Exception:
+        traceback.print_exc()
+    finally:
+        t1 = time.time()
+        original_tokens = len(encode(original_question)[0])
+        new_tokens = len(encode(original_question + reply)[0]) - original_tokens
         print(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {original_tokens}, seed {seed})')
         return
 
