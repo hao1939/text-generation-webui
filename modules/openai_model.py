@@ -5,7 +5,6 @@ https://github.com/openai/openai-python
 '''
 import openai
 
-from modules.callbacks import Iteratorize
 from modules.logging_colors import logger
 
 
@@ -39,7 +38,7 @@ class OpenAIModel:
 
         return string
 
-    def generate(self, prompt, state, is_chat=False, callback=None):
+    def generate(self, prompt, state, is_stream=False, is_chat=False, callback=None):
 
         logger.info(f"Generating with prompt: {prompt}")
 
@@ -48,26 +47,17 @@ class OpenAIModel:
                 deployment_id=self.deployment,
                 model=self.openai_model_name,
                 prompt=prompt,
+                stream=is_stream,
                 # stop=["\n"],
             )
-            return completion.choices[0].text
+            return completion
 
         else:
             chat_completion = openai.ChatCompletion.create(
                 deployment_id=self.deployment,
                 model=self.openai_model_name,
                 # messages=prompt,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
+                stream=is_stream,
             )
-
-            output = chat_completion.choices[0].message.content
-            if callback:
-                callback(output)
-            return output
-
-    def generate_with_streaming(self, *args, **kwargs):
-        with Iteratorize(self.generate, args, kwargs, callback=None) as generator:
-            reply = ''
-            for token in generator:
-                reply += token
-                yield reply
+            return chat_completion

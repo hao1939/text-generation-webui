@@ -320,20 +320,25 @@ def generate_reply_HF(question, original_question, seed, state, stopping_strings
 def generate_reply_openai(question, original_question, seed, state, eos_token=None, stopping_strings=None, is_chat=False):
     seed = set_manual_seed(state['seed'])
 
-    # import pdb; pdb.set_trace()
     t0 = time.time()
     reply = ''
     try:
 
         if not state['stream']:
-            reply = shared.model.generate(question, state, is_chat=is_chat)
+            completion = shared.model.generate(question, state, is_stream=False, is_chat=is_chat)
             if not is_chat:
-                reply = apply_extensions('output', reply)
+                reply = apply_extensions('output', completion.choices[0].text)
+            else:
+                reply = completion.choices[0].message.content
+
             yield reply
         else:
-            for reply in shared.model.generate_with_streaming(question, state, is_chat=is_chat):
+            for completion in shared.model.generate(question, state, is_stream=True, is_chat=is_chat):
                 if not is_chat:
-                    reply = apply_extensions('output', reply)
+                    reply = apply_extensions('output', completion.choices[0].text)
+                else:
+                    print(completion.choices[0].delta)
+                    reply = completion.choices[0].delta.get('content', '')
                 yield reply
 
     except Exception:
