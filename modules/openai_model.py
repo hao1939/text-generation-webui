@@ -15,12 +15,15 @@ def create_openai_model(model_name: str,
                         deployment: str = None
                         ):
     # setup openai
-    openai.api_type = api_type
     openai.api_key = api_key
-    openai.api_base = api_endpoint
-    openai.api_version = "2023-05-15"  # hardcoded for now
-    # hack to get around the fact that OpenAI and Azure OpenAI have different model names
-    if api_type == "azure":
+
+    # Azure OpenAI Service related configuration
+    if api_type != "open_ai":
+        openai.api_type = api_type
+        openai.api_base = api_endpoint
+        openai.api_version = "2023-05-15"  # hardcoded for now
+
+        # hack to get around the fact that OpenAI and Azure OpenAI have different model names
         print("For Azure OpenAI Service, hijacking the model name to 'gpt-35-turbo', for OpenAI it's 'gpt-3.5-turbo'!")
         return OpenAIModel(openai_model_name="gpt-35-turbo", deployment=deployment)
     else:
