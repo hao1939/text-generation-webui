@@ -1,3 +1,11 @@
+# It's a fork of oobabooga/text-generation-webui, adding support of OpenAI and fixed a streaming bug.
+
+https://github.com/oobabooga/text-generation-webui/issues/2349
+https://github.com/oobabooga/text-generation-webui/pull/2760
+
+https://github.com/oobabooga/text-generation-webui/issues/2880
+https://github.com/oobabooga/text-generation-webui/pull/2838
+
 # Text generation web UI
 
 A gradio web UI for running Large Language Models like LLaMA, llama.cpp, GPT-J, Pythia, OPT, and GALACTICA.
@@ -75,7 +83,7 @@ conda activate textgen
 | MacOS + MPS (untested) | Any | `pip3 install torch torchvision torchaudio` |
 | Windows | NVIDIA | `pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117` |
 
-The up-to-date commands can be found here: https://pytorch.org/get-started/locally/. 
+The up-to-date commands can be found here: https://pytorch.org/get-started/locally/.
 
 #### 2.1 Special instructions
 
@@ -180,7 +188,7 @@ When you load this model in default or notebook modes, the "HTML" tab will show 
     cd text-generation-webui
     python server.py
 
-Then browse to 
+Then browse to
 
 `http://localhost:7860/?__theme=dark`
 
@@ -343,7 +351,7 @@ The presets that are included by default are the result of a contest that receiv
 
 ## Contributing
 
-* Pull requests, suggestions, and issue reports are welcome. 
+* Pull requests, suggestions, and issue reports are welcome.
 * Make sure to carefully [search](https://github.com/oobabooga/text-generation-webui/issues) existing issues before starting a new one.
 * If you have some experience with git, testing an open pull request and leaving a comment on whether it works as expected or not is immensely helpful.
 * A simple way to contribute, even if you are not a programmer, is to leave a 👍 on an issue or pull request that you find relevant.
